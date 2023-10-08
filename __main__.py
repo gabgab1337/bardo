@@ -13,7 +13,6 @@ bot = lightbulb.BotApp(
     default_enabled_guilds = 1077223138934407199
     )
 
-
 #bot.load_extensions_from("./bot/extensions")
 
 ### PICKLE LOADS ###
@@ -54,6 +53,10 @@ className = {'artificer':'Artificer'
              ,'warlock':'Warlock'
              ,'wizard':'Wizard'
              ,'bloodhunter':'Blood Hunter'}
+
+# CUSTOM EMOTES #
+emoteNat1 = ':skull:'
+emoteNat20 = ':partying_face:'
 
 #############
 ### ROLLS ###
@@ -110,14 +113,13 @@ async def roll(ctx):
         total = slicedInput[0]
     ### ### ###
     
-    
     if is1D20 and (throws[0] == 20 or throws[0] == 1):
         ###NAT 20###
         if throws[0] == 20:
-            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}`  :partying_face: ***A NATURAL 20*** :partying_face:')
+            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}`  {emoteNat20} ***A NATURAL 20*** {emoteNat20}')
         ###NAT 1###
         else:
-            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}` :skull: ***A NATURAL 1*** :skull:')
+            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}` {emoteNat1} ***A NATURAL 1*** {emoteNat1}')
     ###REGULAR RESPONSE###
     else:
         await ctx.respond(f'`{user}` rolls `{inp}`. Roll results: `{throws}`. Total: `{total}`')
@@ -174,14 +176,13 @@ async def r(ctx):
         total = slicedInput[0]
     ### ### ###
     
-    
     if is1D20 and (throws[0] == 20 or throws[0] == 1):
         ###NAT 20###
         if throws[0] == 20:
-            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}`  :partying_face: ***A NATURAL 20*** :partying_face:')
+            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}`  {emoteNat20} ***A NATURAL 20*** {emoteNat20}')
         ###NAT 1###
         else:
-            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}` :skull: ***A NATURAL 1*** :skull:')
+            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}` {emoteNat1} ***A NATURAL 1*** {emoteNat1}')
     ###REGULAR RESPONSE###
     else:
         await ctx.respond(f'`{user}` rolls `{inp}`. Roll results: `{throws}`. Total: `{total}`')
