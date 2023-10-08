@@ -10,7 +10,7 @@ from required import TOKEN
 
 bot = lightbulb.BotApp(
     token = TOKEN,
-    #default_enabled_guilds =
+    default_enabled_guilds = 1077223138934407199
     )
 
 
@@ -25,10 +25,10 @@ spellsList = {}
 with open(os.path.join(mainDir, 'spells/spellsList.pkl'), 'rb') as file:
     spellsList = pickle.load(file)
 ### hit dice ###
-classDie = {'artificer':8
+classHitDie = {'artificer':8
            ,'barbarian':12
            ,'bard':8
-           ,'cleric':8
+           ,'cleric':8 
            ,'druid':8
            ,'fighter':10
            ,'monk':8
@@ -63,137 +63,128 @@ className = {'artificer':'Artificer'
 @lightbulb.command('roll', 'Roll a dice!')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def roll(ctx):
-    
-    ops = {
-    '+' : operator.add,
-    '-' : operator.sub,
-    '*' : operator.mul,
-    '/' : operator.truediv}
-
     user = ctx.author
-    userInput = ctx.options.dice.upper().replace(" ", "")
-    slicedInput = userInput.split('D')
-    
-    if slicedInput[0] == '':
-            slicedInput[0] = '1'
+    inp = ctx.options.dice.upper().replace(" ", "")
 
-    if (not slicedInput[0].isdigit()) or len(slicedInput) != 2:
-        await ctx.respond('Error: Wrong amount of dice, or missing \'d\'')
-        return
+    slicedInput = re.split(r'[\+\-\*\/]', inp)
+    operators = re.findall(r'[\+\-\*\/]', inp)
 
-    count = int(slicedInput[0])
-    dice = 0
-    total = 0
-    oper = ''
+    throws = []
+    is1D20 = True
 
-    if not slicedInput[1].isdigit():
-        for i in slicedInput[1]:
-            if i in ops:
-                oper = i
-                break
+    for i in range(len(slicedInput)):
+        item = slicedInput[i]
+        if item.isdigit():
+            continue
+        elif 'D' not in item:
+            await ctx.respond(f'Error: `{item}` is not a die or modifier')
+            return
+        
+        tempSplit = item.split('D')
+        
+        if tempSplit[0] == '':
+                tempSplit[0] = '1'
+        
+        if int(tempSplit[0]) > 1000000 or int(tempSplit[1]) > 1000000:
+            await ctx.respond('Error: Try smaller numbers')
+            return
+        wynik = [random.randrange(int(tempSplit[1])) + 1 for _ in range(int(tempSplit[0]))]
 
-        if oper != '':
-            slicedInput = slicedInput[1].split(oper)
-        dice = int(slicedInput[0])
+        for j in wynik:
+            throws.append(j)
+        wynik = sum(wynik)
+        slicedInput[i] = wynik
+        if int(tempSplit[1]) != 20 or int(tempSplit[0]) != 1:
+            is1D20 = False
 
+    # CALCULATE TOTAL HERE #
+    expression = ''
+    if len(operators) != 0:
+        expression = ''
+        for i in range(len(operators)):
+            expression += str(slicedInput[i]) + operators[i]
+            if i == len(operators) - 1:
+                expression += str(slicedInput[i + 1])
+        total = eval(expression)
     else:
-        dice = int(slicedInput[1]) 
-
-    if (not slicedInput[0].isdigit()) or (not slicedInput[1].isdigit()) or len(slicedInput) != 2:
-        await ctx.respond('Error: Wrong die or modifier')
-        return
-
-    if count > 100 or dice > 1000000 or int(slicedInput[1]) > 1000000:
-        await ctx.respond('Error: Try smaller numbers')
-        return
-
-    throws = [random.randrange(dice) + 1 for i in range(count)]
-
-    if oper != '':
-        total = ops[oper](sum(throws), int(slicedInput[1]))
-    else:
-        total = sum(throws)
+        total = slicedInput[0]
+    ### ### ###
     
-    ###NAT 1 or NAT 20###
-    if len(throws) == 1 and dice == 20 and (throws[0] == 20 or throws[0] == 1):
+    
+    if is1D20 and (throws[0] == 20 or throws[0] == 1):
         ###NAT 20###
         if throws[0] == 20:
-            await ctx.respond(f'`{user}` rolls `{userInput}`. Roll result: `{throws}` Total: `{total}` :partying_face: ***A NATURAL 20*** :partying_face:')
+            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}`  :partying_face: ***A NATURAL 20*** :partying_face:')
         ###NAT 1###
         else:
-            await ctx.respond(f'`{user}` rolls `{userInput}`. Roll results: `{throws}` Total: `{total}` :skull: ***A NATURAL 1*** :skull:')
+            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}` :skull: ***A NATURAL 1*** :skull:')
     ###REGULAR RESPONSE###
     else:
-        await ctx.respond(f'`{user}` rolls `{userInput}`. Roll result: `{throws}`. Total: `{total}`')
-
+        await ctx.respond(f'`{user}` rolls `{inp}`. Roll results: `{throws}`. Total: `{total}`')
 
 @bot.command
 @lightbulb.option('dice', 'ex: "3d20 + 3" or "stats" for stat rolls', type = str)
 @lightbulb.command('r', 'Roll a dice!')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def r(ctx):
-    
-    ops = {
-    '+' : operator.add,
-    '-' : operator.sub,
-    '*' : operator.mul,
-    '/' : operator.truediv}
-
     user = ctx.author
-    userInput = ctx.options.dice.upper().replace(" ", "")
-    slicedInput = userInput.split('D')
-    
-    if slicedInput[0] == '':
-            slicedInput[0] = '1'
+    inp = ctx.options.dice.upper().replace(" ", "")
 
-    if (not slicedInput[0].isdigit()) or len(slicedInput) != 2:
-        await ctx.respond('Error: Wrong amount of dice, or missing \'d\'')
-        return
+    slicedInput = re.split(r'[\+\-\*\/]', inp)
+    operators = re.findall(r'[\+\-\*\/]', inp)
 
-    count = int(slicedInput[0])
-    dice = 0
-    total = 0
-    oper = ''
+    throws = []
+    is1D20 = True
 
-    if not slicedInput[1].isdigit():
-        for i in slicedInput[1]:
-            if i in ops:
-                oper = i
-                break
+    for i in range(len(slicedInput)):
+        item = slicedInput[i]
+        if item.isdigit():
+            continue
+        elif 'D' not in item:
+            await ctx.respond(f'Error: `{item}` is not a die or modifier')
+            return
+        
+        tempSplit = item.split('D')
+        
+        if tempSplit[0] == '':
+                tempSplit[0] = '1'
+        
+        if int(tempSplit[0]) > 1000000 or int(tempSplit[1]) > 1000000:
+            await ctx.respond('Error: Try smaller numbers')
+            return
+        wynik = [random.randrange(int(tempSplit[1])) + 1 for _ in range(int(tempSplit[0]))]
 
-        if oper != '':
-            slicedInput = slicedInput[1].split(oper)
-        dice = int(slicedInput[0])
+        for j in wynik:
+            throws.append(j)
+        wynik = sum(wynik)
+        slicedInput[i] = wynik
+        if int(tempSplit[1]) != 20 or int(tempSplit[0]) != 1:
+            is1D20 = False
 
+    # CALCULATE TOTAL HERE #
+    expression = ''
+    if len(operators) != 0:
+        expression = ''
+        for i in range(len(operators)):
+            expression += str(slicedInput[i]) + operators[i]
+            if i == len(operators) - 1:
+                expression += str(slicedInput[i + 1])
+        total = eval(expression)
     else:
-        dice = int(slicedInput[1]) 
-
-    if (not slicedInput[0].isdigit()) or (not slicedInput[1].isdigit()) or len(slicedInput) != 2:
-        await ctx.respond('Error: Wrong die or modifier')
-        return
-
-    if count > 100 or dice > 1000000 or int(slicedInput[1]) > 1000000:
-        await ctx.respond('Error: Try smaller numbers')
-        return
-
-    throws = [random.randrange(dice) + 1 for i in range(count)]
-
-    if oper != '':
-        total = ops[oper](sum(throws), int(slicedInput[1]))
-    else:
-        total = sum(throws)
+        total = slicedInput[0]
+    ### ### ###
     
-    ###NAT 1 or NAT 20###
-    if len(throws) == 1 and dice == 20 and (throws[0] == 20 or throws[0] == 1):
+    
+    if is1D20 and (throws[0] == 20 or throws[0] == 1):
         ###NAT 20###
         if throws[0] == 20:
-            await ctx.respond(f'`{user}` rolls `{userInput}`. Roll result: `{throws}` Total: `{total}` :partying_face: ***A NATURAL 20*** :partying_face:')
+            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}`  :partying_face: ***A NATURAL 20*** :partying_face:')
         ###NAT 1###
         else:
-            await ctx.respond(f'`{user}` rolls `{userInput}`. Roll results: `{throws}` Total: `{total}` :skull: ***A NATURAL 1*** :skull:')
+            await ctx.respond(f'`{user}` rolls `{inp}`. Roll result: `{throws}` Total: `{total}` :skull: ***A NATURAL 1*** :skull:')
     ###REGULAR RESPONSE###
     else:
-        await ctx.respond(f'`{user}` rolls `{userInput}`. Roll result: `{throws}`. Total: `{total}`')
+        await ctx.respond(f'`{user}` rolls `{inp}`. Roll results: `{throws}`. Total: `{total}`')
 
 ##############
 ### SPELLS ###
@@ -270,7 +261,7 @@ async def hp(ctx):
     if userInputStripped == "help":
         await ctx.respond(f'*Hit Dice determines amount of Hit Points you can gain with every level, and recover with every short rest :sleeping:. *\n**d6** - `[\'Sorcerer\', \'Wizard\']`\n**d8** - `[\'Artificer\', \'Bard\', \'Cleric\', \'Druid\', \'Monk\', \'Rogue\', \'Warlock\']`\n**d10** - `[\'Fighter\', \'Paladin\', \'Ranger\', \'Blood Hunter\']`\n**d12** - `[\'Barbarian\']`')
         return
-    dice = classDie[userInputStripped]
+    dice = classHitDie[userInputStripped]
 
     await ctx.respond(f'`{user}`rolls for :sparkling_heart:  as **{className[userInputStripped]}** (d{dice}). Result: **{random.randrange(dice) + 1}**')
 
