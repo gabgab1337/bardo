@@ -23,3 +23,5 @@ Feel free to clone and use for your own RPG sessions :))
 `/ranking` ***TBD***
 
 My discord tag: `depeshe`
+
+*This project is licensed under the terms of the MIT license.*
